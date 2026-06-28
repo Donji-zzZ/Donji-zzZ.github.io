@@ -1,0 +1,113 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TimeLineElement from "../components/cv/TimeLine.astro";
+---
+
+<BaseLayout title="CV" sideBarActiveItemID="cv">
+  <div class="mb-5 flex items-center justify-between flex-wrap gap-3">
+    <div class="text-3xl font-bold">Profile</div>
+    <!-- Drop your CV PDF in /public as cv.pdf so this link works. -->
+    <a href="/cv.pdf" target="_blank" class="btn btn-sm btn-outline">Download CV (PDF)</a>
+  </div>
+
+  <div class="mb-10 text-justify">
+    PhD student in Electrical &amp; Computer Engineering at the University of Houston, with a mathematics
+    background (M.S., Shenzhen University). My research applies deep learning to geophysical and environmental
+    imaging — probabilistic airborne electromagnetic (AEM) inversion, hyperspectral methane detection, and
+    underwater image processing — alongside current work on CO2 / CCS subsurface monitoring.
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Education</div>
+  </div>
+
+  <div class="time-line-container grid gap-4 mb-10">
+    <TimeLineElement
+      title="PhD, Electrical & Computer Engineering"
+      subtitle="Aug 2024 to Present at University of Houston, Houston, TX, USA"
+    />
+    <TimeLineElement
+      title="M.S., Mathematics & Applied Mathematics"
+      subtitle="Sept 2021 to Jun 2024 at Shenzhen University, Shenzhen, China"
+    >
+      <!-- Class ranking 1/28 (2022–2023). Tencent Founder Scholarship (top 1%) and first-class scholarship (top 10%). -->
+    </TimeLineElement>
+    <TimeLineElement
+      title="B.S., Mathematics & Applied Mathematics"
+      subtitle="Sept 2017 to Jul 2021 at Guangzhou University, Guangzhou, China"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Research experience</div>
+  </div>
+
+  <div class="time-line-container mb-10">
+    <TimeLineElement
+      title="Research Assistant — MODAL Lab (advisor: Dr. Jiefu Chen)"
+      subtitle="Aug 2024 to Present at University of Houston, Houston, TX, USA"
+    >
+      Deep learning for geophysical imaging: probabilistic AEM inversion with conditional variational
+      autoencoders, and CO2 / CCS monitoring with 4D seismic and gravity.
+    </TimeLineElement>
+    <TimeLineElement
+      title="Research Assistant (advisor: Dr. Qianqian Tong)"
+      subtitle="Aug 2023 to Jan 2024 at Pengcheng Laboratory, Shenzhen, China"
+    />
+    <TimeLineElement
+      title="Research Assistant (advisor: Dr. Bo Chen)"
+      subtitle="Oct 2021 to Jun 2023 at Shenzhen University, Shenzhen, China"
+    />
+    <TimeLineElement
+      title="Research Assistant (advisor: Dr. Yubin Zhong)"
+      subtitle="Aug 2018 to Sept 2018 at Guangzhou University, Guangzhou, China"
+    />
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Publications</div>
+  </div>
+
+  <ul class="list-disc mx-6 mb-2 grid gap-2">
+    <li>
+      C. Zhou, S. Wu, J. Sun, J. Chen, Y. Huang, "Probabilistic inversion of airborne electromagnetic data using
+      a conditional variational autoencoder: Yellowstone case study," <i>IEEE Transactions on Geoscience and
+      Remote Sensing</i> (accepted).
+    </li>
+    <li>
+      C. Zhou, S. Wu, J. Sun, J. Chen, Y. Huang, "Deep learning-based probabilistic imaging of Yellowstone's
+      hydrothermal system from AEM data," <i>AGU Annual Meeting</i>, 2025 (abstract).
+    </li>
+    <li>
+      Y. Zi, C. Zhou, J. Chen, Z. Han, Y. Huang, X. Wu, "Hyperspectral methane plume segmentation through
+      foundation computer vision models," <i>IEEE Access</i>.
+    </li>
+    <li>
+      B. Chen, C. Zhou*, X. Sun, "Enhancing green screen matting with group normalization and perceptual loss
+      for color overflow and complex edges," <i>The Visual Computer</i>.
+    </li>
+    <li>
+      C. Zhou, L. Walker, X. Fu, J. Chen, Y. Huang, X. Wu, "A mobile platform for AI-powered underwater image
+      processing," <i>Offshore Technology Conference (OTC)</i>, 2025.
+    </li>
+    <li>
+      C. Zhou, B. Chen, Y. Zhang, W. Chen, B. Pan, J. Ji, "Underwater image enhancement via multi-color space
+      correction and fusion," <i>ICEIECT</i>, 2023.
+    </li>
+  </ul>
+  <div class="mx-6 mb-10 text-sm opacity-75">
+    * corresponding author ·
+    <a class="underline" href="https://scholar.google.com/citations?user=9xZXl44AAAAJ&hl=en" target="_blank">Google Scholar</a>
+  </div>
+
+  <div class="mb-5">
+    <div class="text-3xl w-full font-bold">Awards &amp; honors</div>
+  </div>
+
+  <ul class="list-disc mx-6 mb-10 grid gap-2">
+    <li>Tencent Founder Scholarship (top 0.6%), 2023</li>
+    <li>First-class graduate scholarship (top 10%), 2022 &amp; 2023</li>
+    <li>Second prize, APMCM Mathematical Contest in Modeling (top 30%), 2022</li>
+    <li>Research Excellence Prize for Undergraduates (top 30%), 2021</li>
+  </ul>
+</BaseLayout>

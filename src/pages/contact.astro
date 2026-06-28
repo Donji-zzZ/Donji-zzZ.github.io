@@ -1,0 +1,84 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const EMAIL = "jidon0112@gmail.com";
+---
+
+<BaseLayout title="Contact" sideBarActiveItemID="contact">
+  <div class="mb-8">
+    <div class="text-3xl w-full font-bold mb-2">Contact</div>
+    <div class="text-lg opacity-90">
+      Based at the University of Houston. Drop a note below and it comes straight to my inbox,
+      or email me directly at <a class="link" href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+    </div>
+  </div>
+
+  <!-- Map: University of Houston (scroll / +- to zoom) -->
+  <div class="rounded-lg overflow-hidden border border-base-300 mb-10">
+    <iframe
+      title="University of Houston map"
+      src="https://maps.google.com/maps?q=University%20of%20Houston%2C%20Houston%2C%20TX&z=15&output=embed"
+      width="100%"
+      height="380"
+      class="grayscale"
+      style="border:0; display:block;"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen></iframe>
+  </div>
+
+  <!-- Contact form -->
+  <div class="text-2xl font-bold mb-4">Send a message</div>
+  <form id="contact-form" action={`https://formsubmit.co/${EMAIL}`} method="POST" class="flex flex-col gap-4 max-w-xl">
+    <input type="hidden" name="_subject" value="New message from your website" />
+    <input type="hidden" name="_template" value="table" />
+    <input type="hidden" name="_captcha" value="false" />
+    <!-- honeypot: hidden from people, catches bots -->
+    <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none" />
+
+    <input id="name" name="name" type="text" required class="input input-bordered w-full" placeholder="Your name" />
+    <input id="email" name="email" type="email" required class="input input-bordered w-full" placeholder="you@example.com" />
+    <textarea id="message" name="message" rows="5" required class="textarea textarea-bordered w-full" placeholder="Your message"></textarea>
+    <div class="flex items-center gap-4">
+      <button type="submit" class="btn btn-primary">Send message</button>
+      <span id="form-status" class="text-sm opacity-80" aria-live="polite"></span>
+    </div>
+  </form>
+
+  <script>
+    function initContactForm() {
+      const form = document.getElementById("contact-form") as HTMLFormElement | null;
+      if (!form || form.dataset.ready === "1") return;
+      form.dataset.ready = "1";
+      const status = document.getElementById("form-status");
+      const action = form.getAttribute("action") || "";
+      const endpoint = action.replace("formsubmit.co/", "formsubmit.co/ajax/");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        if (status) status.textContent = "Sending...";
+        if (btn) btn.disabled = true;
+        try {
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify(Object.fromEntries(new FormData(form) as any)),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            form.reset();
+            if (status) status.textContent = "Thanks - your message has been sent.";
+          } else if (status) {
+            status.textContent = (data && data.message) ? data.message : "Could not send. Please email me directly.";
+          }
+        } catch (err) {
+          if (status) status.textContent = "Network error. Please email me directly.";
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", initContactForm);
+    if (document.readyState !== "loading") initContactForm();
+    else document.addEventListener("DOMContentLoaded", initContactForm);
+  </script>
+</BaseLayout>

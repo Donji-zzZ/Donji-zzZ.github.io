@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HorizontalCard from "../components/HorizontalCard.astro";
+import { getCollection } from "astro:content";
+import createSlug from "../lib/createSlug"
+
+const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const last_posts = posts.slice(0, 3);
+---
+
+<BaseLayout sideBarActiveItemID="home">
+  <div class="pb-12 mt-5">
+    <div class="text-xl py-1">Hi, I'm 👋</div>
+    <div class="text-5xl font-bold">Chenyu Zhou</div>
+    <div class="text-3xl py-3 font-bold">PhD student · geophysical imaging &amp; machine learning</div>
+    <div class="py-2">
+      <text class="text-lg">
+        I reconstruct images of the Earth's interior from seismic and electromagnetic data — and estimate how
+        much to trust them — at the University of Houston. The rest of the time I photograph what's above the
+        surface. Two kinds of imaging, one habit: hold still, pay attention, and let the picture resolve.
+      </text>
+    </div>
+    <!-- <div class="mt-8">
+      <a class="btn" href="mailto:jidon0112@gmail.com"> Email me</a>
+      <a href="https://scholar.google.com/citations?user=9xZXl44AAAAJ&hl=en" target="_blank" class="btn btn-outline ml-5">
+        Google Scholar
+      </a> -->
+    </div>
+  </div>
+
+  <div>
+    <div class="text-3xl w-full font-bold mb-2">Research highlights</div>
+  </div>
+
+  <HorizontalCard
+    title="Probabilistic electromagnetic imaging"
+    img="/post_img.webp"
+    desc="A conditional VAE that inverts airborne EM data into a distribution of resistivity models — mapping the hydrothermal system beneath Yellowstone, with uncertainty made explicit."
+    url="/research"
+    badge="IEEE TGRS"
+    target="_self"
+  />
+  <div class="divider my-0"></div>
+  <HorizontalCard
+    title="Monitoring carbon underground"
+    img="/post_img.webp"
+    desc="Tracking injected CO2 with time-lapse seismic, gravity, and ML surrogate models fast enough to forecast where the plume goes next — toward verifiable geologic carbon storage."
+    url="/research"
+    badge="Ongoing"
+    target="_self"
+  />
+
+  <div>
+    <div class="text-3xl w-full font-bold mb-5 mt-10">Latest field notes</div>
+  </div>
+
+  {
+    last_posts.map((post) => (
+      <>
+        <HorizontalCard
+          title={post.data.title}
+          img={post.data.heroImage}
+          desc={post.data.description}
+          url={"/blog/" + createSlug(post.data.title, post.slug)}
+          target="_self"
+          badge={post.data.badge}
+        />
+        <div class="divider my-0" />
+      </>
+    ))
+  }
+</BaseLayout>

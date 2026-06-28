@@ -1,0 +1,155 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image, getImage } from "astro:assets";
+import { fileURLToPath } from "node:url";
+import photoMeta from "../data/photos";
+
+// Auto-import every photo dropped into src/images/photography/
+const modules = import.meta.glob(
+  "../images/photography/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}",
+  { eager: true }
+);
+
+// EXIF reader is optional. Run `npm install exifr` to enable automatic
+// camera-setting captions. Without it, the gallery still works (no settings line).
+let exifr: any = null;
+try {
+  const mod = "exifr";                         // kept dynamic so the build never
+  exifr = (await import(/* @vite-ignore */ mod)).default;  // requires exifr to be installed
+} catch (e) { /* exifr not installed -> camera-setting captions simply disabled */ }
+
+const baseName = (p: string) => p.split("/").pop() as string;
+const fmtShutter = (s?: number) =>
+  !s ? null : s >= 1 ? `${s}s` : `1/${Math.round(1 / s)}s`;
+
+const photos: any[] = [];
+for (const [path, mod] of Object.entries(modules)) {
+  const img = (mod as any).default;
+  const file = baseName(path);
+  const meta = (photoMeta as any)[file] || {};
+  let settings: string | null = null;
+  let date: any = null;
+  if (exifr) {
+    try {
+      const abs = fileURLToPath(new URL(path, import.meta.url));
+      const ex = await exifr.parse(abs, ["FocalLength", "FNumber", "ExposureTime", "ISO", "DateTimeOriginal"]);
+      if (ex) {
+        const parts: string[] = [];
+        if (ex.FocalLength) parts.push(`${Math.round(ex.FocalLength)}mm`);
+        if (ex.FNumber) parts.push(`f/${ex.FNumber}`);
+        const sh = fmtShutter(ex.ExposureTime); if (sh) parts.push(sh);
+        if (ex.ISO) parts.push(`ISO ${ex.ISO}`);
+        settings = parts.join("  ·  ") || null;
+        date = ex.DateTimeOriginal || null;
+      }
+    } catch (e) { /* no exif on this file */ }
+  }
+  // high-res version for the lightbox (capped at the photo's native width, no upscaling)
+  const full = await getImage({
+    src: img,
+    width: Math.min(2400, img.width || 2400),
+    quality: 85,
+    format: "webp",
+  });
+  photos.push({
+    full: full.src,
+    img, file,
+    location: meta.location || null,
+    caption: meta.caption || null,
+    alt: meta.alt || meta.caption || meta.location || "Photograph by Chenyu Zhou",
+    settings, date,
+  });
+}
+
+photos.sort((a, b) =>
+  a.date && b.date ? +new Date(b.date) - +new Date(a.date) : a.file.localeCompare(b.file)
+);
+
+const hasPhotos = photos.length > 0;
+---
+
+<BaseLayout title="Photography" sideBarActiveItemID="photography" wide={true}>
+  <div class="mb-8">
+    <div class="text-3xl w-full font-bold mb-2">Photography</div>
+    <div class="text-lg opacity-90">
+      Mostly landscapes and mountains — the same instinct as the science, pointed the other way:
+      hold still, pay attention, and let the image resolve.{hasPhotos && " Tap any photo to enlarge."}
+    </div>
+  </div>
+
+  {hasPhotos ? (
+    <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
+      {photos.map((p) => (
+        <figure
+          class="gallery-item mb-4 break-inside-avoid cursor-zoom-in group relative overflow-hidden rounded-lg bg-base-200"
+          data-caption={[p.location, p.settings].filter(Boolean).join("    ·    ")}
+          data-full={p.full}
+        >
+          <Image
+            src={p.img}
+            alt={p.alt}
+            widths={[400, 800, 1200, 1600, 2000]}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            quality={82}
+            loading="lazy"
+            class="w-full h-auto block transition duration-300 group-hover:scale-[1.03]"
+          />
+          {(p.location || p.settings) && (
+            <figcaption class="absolute inset-x-0 bottom-0 p-3 text-white opacity-0 group-hover:opacity-100 transition bg-gradient-to-t from-black/70 to-transparent">
+              {p.location && <span class="text-sm font-medium">{p.location}</span>}
+              {p.settings && <span class="block text-xs opacity-80 font-mono">{p.settings}</span>}
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  ) : (
+    <div>
+      <div class="bg-base-200 border-l-4 border-secondary p-4 mb-6">
+        <p class="font-bold">No photos yet.</p>
+        <p>
+          Drop images into <code>src/images/photography/</code> and they'll appear here
+          automatically — resized, optimized, and lazy-loaded.
+        </p>
+      </div>
+      <div class="columns-1 sm:columns-2 lg:columns-3 gap-4 opacity-60">
+        {[260, 200, 320, 180, 300, 220].map((h, i) => (
+          <div class="mb-4 break-inside-avoid rounded-lg bg-base-200 animate-pulse" style={`height:${h}px`}></div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="fixed inset-0 z-50 hidden place-items-center bg-black/90 p-4 cursor-zoom-out">
+    <img id="lightbox-img" class="max-h-[85vh] max-w-full object-contain rounded" alt="" />
+    <div id="lightbox-cap" class="absolute bottom-4 inset-x-0 text-center text-sm text-white/90 font-mono px-4"></div>
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white/80 border border-white/40 rounded px-3 py-1 text-sm">Close ✕</button>
+  </div>
+
+  <script>
+    const lb = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lightbox-img") as HTMLImageElement;
+    const lbCap = document.getElementById("lightbox-cap");
+    function openLb(fig: Element) {
+      const img = fig.querySelector("img") as HTMLImageElement;
+      const full = fig.getAttribute("data-full");
+      if (lbImg) { lbImg.src = full || img.currentSrc || img.src; lbImg.alt = img.alt || ""; }
+      if (lbCap) lbCap.textContent = fig.getAttribute("data-caption") || "";
+      lb?.classList.remove("hidden"); lb?.classList.add("grid");
+    }
+    function closeLb() {
+      lb?.classList.add("hidden"); lb?.classList.remove("grid");
+      if (lbImg) lbImg.src = "";
+    }
+    document.querySelectorAll(".gallery-item").forEach((f) =>
+      f.addEventListener("click", () => openLb(f))
+    );
+    lb?.addEventListener("click", (e) => {
+      const t = e.target as HTMLElement;
+      if (t === lb || t.id === "lightbox-close") closeLb();
+    });
+    document.getElementById("lightbox-close")?.addEventListener("click", closeLb);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
+  </script>
+</BaseLayout>
