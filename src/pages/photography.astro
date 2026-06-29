@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { Image, getImage } from "astro:assets";
-import { fileURLToPath } from "node:url";
+import nodePath from "node:path";
 import photoMeta from "../data/photos";
 
 // Auto-import every photo in src/images/photography/ AND its year subfolders.
@@ -48,7 +48,7 @@ for (const [path, mod] of Object.entries(modules)) {
   let camera: string | null = null;
   if (exifr) {
     try {
-      const abs = fileURLToPath(new URL(path, import.meta.url));
+      const abs = nodePath.join(process.cwd(), "src/images/photography", path.split("/photography/")[1]);
       const ex = await exifr.parse(abs, ["Make", "Model", "FocalLength", "FNumber", "ExposureTime", "ISO"]);
       if (ex) {
         const parts: string[] = [];
