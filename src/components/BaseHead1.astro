@@ -37,21 +37,3 @@ const { title, description, image = '/social_img.webp', ogType = 'website' } = A
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
-
-<!-- GoatCounter analytics (privacy-friendly; counts each page incl. in-site navigation) -->
-<script
-  is:inline
-  data-goatcounter="https://donji-zzz.goatcounter.com/count"
-  async
-  src="//gc.zgo.at/count.js"></script>
-<script is:inline>
-  // count.js auto-counts the first page load; this adds counts for
-  // Astro View-Transitions navigations (which don't reload the page).
-  (function () {
-    var first = true;
-    document.addEventListener("astro:page-load", function () {
-      if (first) { first = false; return; }
-      if (window.goatcounter && window.goatcounter.count) window.goatcounter.count();
-    });
-  })();
-</script>
