@@ -11,6 +11,21 @@ export interface Props {
 }
 
 const { title, description, image = '/social_img.webp', ogType = 'website' } = Astro.props;
+
+const personSchema = {
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: 'Chenyu Zhou',
+	alternateName: '周陈宇',
+	url: 'https://donji-zzz.github.io/',
+	jobTitle: 'PhD Student',
+	affiliation: { '@type': 'CollegeOrUniversity', name: 'University of Houston' },
+	sameAs: [
+		'https://scholar.google.com/citations?user=9xZXl44AAAAJ&hl=en',
+		'https://github.com/Donji-zzZ',
+		'https://www.linkedin.com/in/chenyu-zhou-93b83a387',
+	],
+};
 ---
 
 <!-- Global Metadata -->
@@ -37,6 +52,9 @@ const { title, description, image = '/social_img.webp', ogType = 'website' } = A
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+<!-- Person structured data (helps Google connect this site to you) -->
+<script type="application/ld+json" is:inline set:html={JSON.stringify(personSchema)} />
 
 <!-- GoatCounter analytics (privacy-friendly; counts each page incl. in-site navigation) -->
 <script
